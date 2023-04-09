@@ -1,0 +1,30 @@
+{
+	"name": "herborium",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+	},
+	"devDependencies": {
+		"@picocss/pico": "^1.5.7",
+		"@supabase/supabase-js": "^2.15.0",
+		"@sveltejs/adapter-auto": "^2.0.0",
+		"@sveltejs/kit": "^1.5.0",
+		"@tanstack/svelte-table": "^8.8.5",
+		"@types/three": "^0.150.1",
+		"svelte": "^3.54.0",
+		"svelte-check": "^3.0.1",
+		"three": "^0.151.3",
+		"tslib": "^2.4.1",
+		"typescript": "^5.0.0",
+		"vite": "^4.2.0"
+	},
+	"type": "module",
+	"dependencies": {
+		"dat.gui": "^0.7.9"
+	}
+}
