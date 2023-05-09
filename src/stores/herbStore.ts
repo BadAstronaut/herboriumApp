@@ -5,6 +5,10 @@ import { readable } from 'svelte/store';
 export const herbStore = writable({});
 
 export const herbModels = readable({
-    'Basil': '/threemodels/Basil.glb',
-    'Mint': '/threemodels/Mint.glb',
+    'Basil': '/threemodels/basil/basil_2.glb',
+    'Strawberry': '/threemodels/strawberry/strawberry_3.glb',
+    'Kale': '/threemodels/kale/kale_2.glb',
+
 })
+
+export let selectedHerbKey = writable('Basil');

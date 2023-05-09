@@ -1,8 +1,8 @@
 <script lang="ts">
     //import {Herb} from '$lib/herbObject';
-    import { writable } from "svelte/store";
+    import { writable, get} from "svelte/store";
     // @ts-ignore
-    import { herbStore } from "/src/stores/herbStore.ts";
+    import { herbStore, selectedHerbKey } from "/src/stores/herbStore.ts";
     import { onMount } from "svelte";
     import {
         createSvelteTable,
@@ -18,7 +18,7 @@
     //subscribes to the herbStore
     let herbs: any;
     let table: any;
-
+    let selectedRow:any = null;
     //implement on mount
     onMount(async () => {
         herbStore.subscribe((value: any) => {
@@ -36,28 +36,28 @@
             debugTable: true,
         });
         table = createSvelteTable(options);
+        selectedHerbKey.subscribe((value: any) => {
+            //table.setRowSelection(value);
+            //get the index of the herbs using the value as a key 
+            let herbKeyIndex = herbs.herbs.findIndex((herb: any) => herb.herb_name === value);
+            const tableObject = get(table);
+            if (herbKeyIndex > -1) {
+                const row = tableObject.getRow(herbKeyIndex.toString())
+                setRowSelection(row)
+            }
+            
+            //console.log(herbKeyIndex, "selected herb key........");
+            //tableObject.setRowSelection('1', true);
+        });
     });
 
-    let selectedRow = null;
+    
 
     type Herb = {
         herb_name: string;
         planted_date: string;
         planned_harvest_date: string;
     };
-
-    // const defaultHerbs: Herb[] = [
-    //     { name: "Basil", price: 1.99, stock: 10 },
-    //     { name: "Chives", price: 2.99, stock: 5 },
-    //     { name: "Cilantro", price: 3.99, stock: 0 },
-    //     { name: "Dill", price: 4.99, stock: 2 },
-    //     { name: "Lavender", price: 5.99, stock: 8 },
-    //     { name: "Mint", price: 6.99, stock: 3 },
-    //     { name: "Oregano", price: 7.99, stock: 7 },
-    //     { name: "Parsley", price: 8.99, stock: 1 },
-    //     { name: "Rosemary", price: 9.99, stock: 4 },
-    //     { name: "Sage", price: 10.99, stock: 6 },
-    // ];
 
     const defaultColumns: ColumnDef<Herb>[] = [
         {
@@ -79,18 +79,20 @@
             //footer: info => info.column.id,
         },
     ];
-
+    //create a function to set the id of the selected row
     function setRowSelection(row: any) {
         selectedRow = row;
-        console.log(row, "row selection changed");
+        let currentSelected  = get(selectedHerbKey);
+        //conver string to in 
+        let herbKeyIndex = parseInt(row.id);
+        if (currentSelected != herbs.herbs[herbKeyIndex].herb_name){
+            //console.log(herbs.herbs[herbKeyIndex].herb_name, "herb name"
+            selectedHerbKey.set(herbs.herbs[herbKeyIndex].herb_name);
+        }
+        //console.log(row, "row selection changed");
     }
 
-    // const rerender = () => {
-    //     options.update((options) => ({
-    //         ...options,
-    //         data: herbs,
-    //     }));
-    // };
+
 </script>
 
 {#if herbs}

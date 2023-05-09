@@ -1,12 +1,14 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    //import write
+    import { writable, get } from "svelte/store";
     import * as THREE from "three";
+    import { OBJLoader } from 'three-obj-loader';
     import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
     import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
     import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
     // @ts-ignore
-    import { herbStore, herbModels } from "/src/stores/herbStore.ts";
-    import { get } from "svelte/store";
+    import { herbStore, herbModels, selectedHerbKey } from "/src/stores/herbStore.ts";
     //import * as dat from "dat.gui";
 
     let scene: THREE.Scene;
@@ -43,7 +45,14 @@
         const near = 0.1;
         const far = 1000;
         camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-        camera.position.z = 5;
+        camera.position.z = 80;
+        camera.position.y = 20;
+        camera.position.x = 90;
+        // ... Three.js scene setup code ...
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
 
         // Initialize renderer
         renderer = new THREE.WebGLRenderer({
@@ -62,15 +71,35 @@
         controls.rotateSpeed = 0.5;
         controls.zoomSpeed = 1.2;
         controls.panSpeed = 0.8;
+        //implement pan functionality when middle click is pressed or hold down on mobile
+        controls.enablePan = true;
+        controls.screenSpacePanning = false;
+
 
         // Initialize ambient light
-        ambientLight = new THREE.AmbientLight(0xffe7c4, 0.5);
+        ambientLight = new THREE.AmbientLight(0xffe7c4, 1);
+
         scene.add(ambientLight);
 
         // Initialize directional light
         directionalLight = new THREE.DirectionalLight(0xffe7c4, 0.5);
-        directionalLight.position.set(10, 10, 10);
+        directionalLight.position.set(0, 50, 0);
         scene.add(directionalLight);
+
+        //create a plane to receive shadows
+        const planeGeometry = new THREE.PlaneGeometry(100, 100, 32, 32);
+        const planeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x9c9c9c,
+            side: THREE.DoubleSide,
+        });
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.receiveShadow = true;
+        plane.rotation.x = Math.PI / 2;
+        plane.position.y = 2.8;
+        plane.position.x = 40;
+        plane.position.z = 40;
+        scene.add(plane);
+
 
         //light controller
         // // Create a new instance of the dat.GUI controller
@@ -102,18 +131,33 @@
             //console.log(intersects[0], "intersects");
 
             if (intersects.length > 0) {
+                const selecting = intersects[0].object;
+                const selectedObject =getHerbData(intersects[0].object) ;
+                selectedHerbKey.set(selectedObject);
+                const parentObjt = getParentGroup(intersects[0].object);
+                //console.log(intersects[0].object, "selectedObject");
+                //ignore for now because its working 
+                selecting.material.color.set(0xff0000);
                 return intersects[0].object;
                 
             }
 
         }
-        renderer.domElement.addEventListener("click", (event) => {
-                const seletedObject= onElementSelected(event);
-                if(seletedObject){
-                    console.log(seletedObject, "click seleccted object");
-                    const seledtedHerb = getParentGroup(seletedObject);
-                    console.log(seledtedHerb,"click");
+        //extract the userData object from the selected object
+        function getHerbData(object: THREE.Object3D | null): any {
+            if (object && object.userData.Herb) {
+                return object.userData.Herb;
+            } else {
+                if (!object) {
+                    return null;
                 }
+                return getHerbData(object.parent);
+            }
+        }
+        renderer.domElement.addEventListener("click", (event) => {
+                //cast selected object to three.object3D
+                const seletedObject= onElementSelected(event) as THREE.Object3D;
+                const selectedHerb = getHerbData(seletedObject);
                 //
                 
             });
@@ -134,8 +178,8 @@
         const loader = new GLTFLoader();
         loader.load(modelUrl, (gltf: GLTF) => {
             model = gltf.scene;
-            gltf.scene.castShadow = true;
-            // Set the receiveShadow property to true on any objects that should receive shadows
+            //gltf.scene.castShadow = true;
+            // Set the receiveShadow property  true on any objects that should receive shadows
             gltf.scene.traverse((child) => {
                 if (child instanceof THREE.Mesh) {
                     child.receiveShadow = true;
@@ -154,17 +198,19 @@
         });
     }
     function loadMultipleModels(herbs:any){
-        const _herbsModels = get(herbModels);
+        const _herbsModels = get(herbModels) as [];
         herbs.forEach((herb:any) => {
             
             //get url from _herbsModels using herbs.herb_name
             const model_url = _herbsModels[herb.herb_name];
             const model_coord = herb.herb_coordinates.coordinates;
+            
             model_coord.forEach((coord:any) => {
                 const herbModelInterface = {
                 herb_name: herb.herb_name,
                 herb_coordinate: coord,
                 };
+                console.log(model_coord, "herb");
                 loadModel(model_url,herbModelInterface);
             });
             
