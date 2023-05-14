@@ -3,10 +3,12 @@
     //import write
     import { writable, get } from "svelte/store";
     import * as THREE from "three";
+    import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
     import { OBJLoader } from 'three-obj-loader';
     import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
     import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
     import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+    import {spotLight, zoomToObject, animateObjectScale, holographicCard, dayAndNightAnimation, loadbirdFlyingAnimation} from "/src/lib/herbAnimation";
     // @ts-ignore
     import { herbStore, herbModels, selectedHerbKey } from "/src/stores/herbStore.ts";
     //import * as dat from "dat.gui";
@@ -19,6 +21,11 @@
     let model: THREE.Object3D;
     let canvas: HTMLCanvasElement;
     let herbs: any;
+    let selectedHerbObject: any;
+    let selectedObjectLight: any;
+    let selectedHoloCard: any;
+    let birdAnimationMixer: any;
+    let clock = new THREE.Clock();
 
     onMount(() => {
         init();
@@ -40,7 +47,7 @@
         scene = new THREE.Scene();
 
         // Initialize camera
-        const fov = 75;
+        const fov = 55;
         const aspect = canvas.clientWidth / canvas.clientHeight;
         const near = 0.1;
         const far = 1000;
@@ -48,6 +55,20 @@
         camera.position.z = 80;
         camera.position.y = 20;
         camera.position.x = 90;
+        const navControls = new PointerLockControls(camera, document.body);
+        scene.add(navControls.getObject());
+
+        // Enable navigation controls
+        function enableControls() {
+            navControls.enabled = true;
+        }
+        // Disable navigation controls
+        function disableControls() {
+            navControls.enabled = false;
+        }
+
+        // Enable controls to start navigating
+        enableControls();
         // ... Three.js scene setup code ...
 
         const raycaster = new THREE.Raycaster();
@@ -63,7 +84,7 @@
         renderer.setSize(canvas.clientWidth, canvas.clientHeight);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
+        renderer.shadowMap.bias = 0.001; // Adjust shadow bias if needed
         //orbit controls
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
@@ -77,46 +98,68 @@
 
 
         // Initialize ambient light
-        ambientLight = new THREE.AmbientLight(0xffe7c4, 1);
+        ambientLight = new THREE.AmbientLight(0xffe7c4, 1.3);
+        
 
         scene.add(ambientLight);
 
         // Initialize directional light
         directionalLight = new THREE.DirectionalLight(0xffe7c4, 0.5);
         directionalLight.position.set(0, 50, 0);
+        directionalLight.castShadow = true;
+        directionalLight.receiveShadow = true;
         scene.add(directionalLight);
 
-        //create a plane to receive shadows
-        const planeGeometry = new THREE.PlaneGeometry(100, 100, 32, 32);
-        const planeMaterial = new THREE.MeshStandardMaterial({
-            color: 0x9c9c9c,
-            side: THREE.DoubleSide,
+
+        const earth = createBasePlane();
+        scene.add(earth);
+        const currentTime = new Date();
+        dayAndNightAnimation(scene, currentTime)
+        loadbirdFlyingAnimation(scene).then((animationMixer) => {
+            birdAnimationMixer = animationMixer;
+            animate();
         });
-        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.receiveShadow = true;
-        plane.rotation.x = Math.PI / 2;
-        plane.position.y = 2.8;
-        plane.position.x = 40;
-        plane.position.z = 40;
-        scene.add(plane);
+        console.log(birdAnimationMixer, "birdAnimationMixer.........")
 
+        function createBasePlane(){
+            // Define the dimensions of the plane
+            const width = 100;
+            const height = 100;
+            const thickness = 2.5;
 
-        //light controller
-        // // Create a new instance of the dat.GUI controller
-        // const gui = new dat.GUI();
+            // Create the shape for extrusion
+            const shape = new THREE.Shape();
+            shape.moveTo(-width / 2, -height / 2);
+            shape.lineTo(width / 2, -height / 2);
+            shape.lineTo(width / 2, height / 2);
+            shape.lineTo(-width / 2, height / 2);
+            shape.lineTo(-width / 2, -height / 2);
 
-        // // Create an object to hold the light intensity value
-        // const lightProps = {
-        //     intensity: 1.0,
-        // };
+            // Extrude the shape to give it thickness
+            const extrusionSettings = { depth: thickness, bevelEnabled: false };
+            const geometry = new THREE.ExtrudeGeometry(shape, extrusionSettings);
 
-        // // Create a folder for the light controls
-        // const lightFolder = gui.addFolder("Light");
+            // Load the texture image
+            const textureLoader = new THREE.TextureLoader();
+            const earthColor = 0xa29686; // Replace with your desired color code
+            const material = new THREE.MeshStandardMaterial({
+                color: earthColor,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            // Create the mesh
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.userData.preventSelection = true; // Set the preventSelection property to true
+            mesh.receiveShadow = true;
+            mesh.castShadow = true;
+            mesh.rotation.x = Math.PI / 2;
+            mesh.position.y = 3;
+            mesh.position.x = 40;
+            mesh.position.z = 40;
 
-        // // Add a controller to adjust the light intensity
-        // lightFolder.add(lightProps, "intensity", 0.0, 2.0).onChange((value) => {
-        //     light.intensity = value;
-        // });
+            return mesh;
+
+        }
 
         //raycaster for selection
         function onElementSelected(event: MouseEvent) {
@@ -131,18 +174,61 @@
             //console.log(intersects[0], "intersects");
 
             if (intersects.length > 0) {
-                const selecting = intersects[0].object;
+                const selectedThreeObject = intersects[0].object;
                 const selectedObject =getHerbData(intersects[0].object) ;
                 selectedHerbKey.set(selectedObject);
                 const parentObjt = getParentGroup(intersects[0].object);
                 //console.log(intersects[0].object, "selectedObject");
                 //ignore for now because its working 
-                selecting.material.color.set(0xff0000);
+                //selectedHerbObject.material.color.set(0xff0000);
+                selectObject(selectedThreeObject);       
+        
+                //zoomToObject(selectedHerbObject, camera)
                 return intersects[0].object;
                 
             }
+            else{
+                selectedHerbKey.set(null);
+                if (selectedHerbObject){
+                    //selectedHerbObject.material.color.set(0xffffff);
+                    selectedHerbObject.remove(selectedObjectLight);
+                    selectedHerbObject.remove(selectedHoloCard);
+                }
+                selectedHerbObject = null;
+                return null;
+            }
+            
 
         }
+        function selectObject(object: THREE.Object3D) {
+            if (object && object.userData.preventSelection) {
+                return; // If the object has the preventSelection property, prevent selection
+            }
+            // First, remove the selection from the previously selected object if there was one
+            if (selectedHerbObject) {
+                
+                //selectedHerbObject.material.color.set(0xffffff); // Set the color to white or any other default color
+                selectedHerbObject.remove(selectedObjectLight);
+                selectedHerbObject.remove(selectedHoloCard);
+                console.log(selectedHerbObject, "selectedHerbObject......");
+            }
+            // Reset the color or any other visual indication of the previous selection
+            
+            selectedHerbObject = object;
+            // selectedHerbObject.material.color=0xffffff // Set the color to red or any other desired color
+            // selectedHerbObject.material.transparent=true // Set the color to red or any other desired color
+            // selectedHerbObject.material.opacity=true // Set the color to red or any other desired color
+            
+            
+            animateObjectScale(selectedHerbObject)
+            selectedHoloCard = holographicCard(selectedHerbObject, get(selectedHerbKey));
+            const _spotLight = spotLight(selectedHerbObject);
+            selectedObjectLight = _spotLight;
+            selectedHerbObject.add(selectedObjectLight);
+            selectedHerbObject.add(selectedHoloCard);
+
+            // Apply visual indication to the newly selected object
+            }
         //extract the userData object from the selected object
         function getHerbData(object: THREE.Object3D | null): any {
             if (object && object.userData.Herb) {
@@ -162,11 +248,17 @@
                 
             });
 
-        //animate
+        //animateposition Vector3 {x: -0.031931713223457336, y: 4.759241580963135, z: -0.06477349996566772}
         function animate() {
             controls.update();
+            //animate bird
+            const delta = clock.getDelta();
+            if (birdAnimationMixer) {
+                birdAnimationMixer.update(delta);
+            }
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
+            //console.log(camera.position, "camera position")
             
         }
         animate();
@@ -182,7 +274,8 @@
             // Set the receiveShadow property  true on any objects that should receive shadows
             gltf.scene.traverse((child) => {
                 if (child instanceof THREE.Mesh) {
-                    child.receiveShadow = true;
+                    //child.receiveShadow = true;
+                    child.castShadow = true;
                 }
             });
             // Set the position of the model

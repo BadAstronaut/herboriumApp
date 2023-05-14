@@ -42,7 +42,7 @@
         align-items: center;
         width: 100%;
         height: 50%;
-        background-color: lightgoldenrodyellow;
+        background-color: whitesmoke;
     }
     .grow-log{
         display: flex;
