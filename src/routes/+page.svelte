@@ -3,8 +3,8 @@
     import GrowLog from "./components/GrowLog.svelte";
     import {onMount} from 'svelte';
     
-    export let data;
-    console.log(data, "from page");
+    export let props;
+    console.log(props, "from page");
 
 
     //on page load fetch data from the getHerbs endpoint 

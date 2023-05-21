@@ -17,6 +17,7 @@
 		"@tanstack/svelte-table": "^8.8.5",
 		"@types/three": "^0.150.2",
 		"gsap": "^3.11.5",
+		"pg-promise": "^11.4.3",
 		"svelte": "^3.54.0",
 		"svelte-check": "^3.0.1",
 		"three": "^0.151.3",

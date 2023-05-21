@@ -11,4 +11,6 @@ export const herbModels = readable({
 
 })
 
+export const herbIoTData = writable({});
+
 export let selectedHerbKey = writable('Basil');

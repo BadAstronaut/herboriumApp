@@ -1,11 +1,22 @@
 import { error } from '@sveltejs/kit';
-import {herbStore} from "/src/stores/herbStore.ts";
+import {herbStore, herbIoTData} from "/src/stores/herbStore.ts";
 
 export async function load({fetch, params }) {
     const response = await fetch('api/supa/getHerbs');
     const data = await response.json();
     herbStore.set(data ?? []);
-    return response.ok ? data : error(response.status, data);
+    const sensorResponse = await fetch('api/supa/getIoT');
+    const iotData = await sensorResponse.json();
+    herbIoTData.set(iotData ?? []);
+    if (response.ok && sensorResponse.ok) {
+        return {
+            props: {
+                herbs: data,
+                iotData: iotData
+            }
+        };
+    }
+
     
 
 }
