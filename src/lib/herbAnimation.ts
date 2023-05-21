@@ -11,7 +11,7 @@ import { herbIoTData } from "/src/stores/herbStore.ts";
 import { gsap, Power1 } from 'gsap';
 
 export function spotLight(object: THREE.Object3D) {
-  const spotLight = new THREE.SpotLight(0xffffff, 0.75, 100, Math.PI / 4, 0.7, 0.5);
+  const spotLight = new THREE.SpotLight(0xffffff, 0.35, 100, Math.PI / 4, 0.7, 0.5);
   spotLight.position.set(object.position.x, 25, object.position.z);
   spotLight.castShadow = true;
   spotLight.target = object;
@@ -94,14 +94,14 @@ export function holographicCard(object: THREE.Object3D, textToRender: string) {
   const textureLoader = new THREE.TextureLoader();
   const glassTexture = textureLoader.load('/cardbackground1.jpg');
   const cardMaterial = new THREE.MeshStandardMaterial({
-    map: glassTexture,
     roughness: 0.5,   // Adjust the roughness to control the smoothness of the material
     metalness: 0.1,   // Increase the metalness for a glass-like appearance
+    color: 0xb7dfb9,   // Set the base color of the material
     //set emissive 
     //emissive: 0xccd6e6,
     transparent: true,   // Enable transparency for the frosted effect
     flatShading: true,   // Disable flat shading to make the material smooth
-    opacity: 0.75,   // Adjust the opacity to control the level of frostiness
+    opacity: 0.7,   // Adjust the opacity to control the level of frostiness
   });
 
   // Create a holographic card mesh
@@ -136,14 +136,17 @@ export function holographicCard(object: THREE.Object3D, textToRender: string) {
   border.scale.set(1, 1, 1); // Adjust the scale as needed to control the size of the dashes
   cardMesh.add(border);
   // Create text mesh
-  const textMaterial = new THREE.MeshBasicMaterial({ color: 0x637b64 }); // Adjust the text color as needed
+  const textMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0x637b64,
+    emissive: 0xccd6e6,
+  }); // Adjust the text color as needed
   const _size = 0.25; // Adjust the text size as needed
   const _height = 0.05; // Adjust the extrusion height as needed
   const relativeLeft = width / 2 - radius * 2;
   const relativeTop = height / 4 - radius * 2;
   const fontLoader = new FontLoader();
   console.log(fontLoader, "fontLoader");
-  fontLoader.load('src/lib/threeFont.json', (font) => {
+  fontLoader.load('/threemodels/threeFont.json', (font) => {
     const txtRender = "Plant Name: " + textToRender;
     const textGeometry = new TextGeometry(txtRender, {
       font: font,
@@ -159,7 +162,7 @@ export function holographicCard(object: THREE.Object3D, textToRender: string) {
   const getTemp = get(herbIoTData)[0].temperature as number;
   //concatenate the getTemp with a string Temperature: {value}
   const tempString = "Temperature: " + getTemp.toString() + "°C";
-  fontLoader.load('src/lib/threeFont.json', (font) => {
+  fontLoader.load('/threemodels/threeFont.json', (font) => {
     const textGeometryTemp = new TextGeometry(tempString, {
       font: font,
       size: _size, // Adjust the text size as needed
@@ -173,7 +176,7 @@ export function holographicCard(object: THREE.Object3D, textToRender: string) {
   const getMoist = get(herbIoTData)[0].soil_moisture as string;
   //concatenate the getTemp with a string Temperature: {value}
   const moistString = "Soil Moisture: " + getMoist + "%";
-  fontLoader.load('src/lib/threeFont.json', (font) => {
+  fontLoader.load('/threemodels/threeFont.json', (font) => {
     const textGeometryTemp = new TextGeometry(moistString, {
       font: font,
       size: _size, // Adjust the text size as needed
@@ -208,8 +211,9 @@ function addSVGIcon(cardMesh: THREE.Mesh) {
       const path = paths[i];
 
       const material = new THREE.MeshStandardMaterial({
-        color: 0x637b64, // Set the color of the SVG icon
+        color: 0xccd6e6, // Set the color of the SVG icon
         opacity: 0.5,
+        emissive: 0xccd6e6,
         transparent: true,
         side: THREE.DoubleSide,
         depthWrite: false

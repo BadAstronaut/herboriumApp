@@ -10,7 +10,7 @@
     import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
     import {spotLight, zoomToObject, animateObjectScale, holographicCard, dayAndNightAnimation, loadbirdFlyingAnimation} from "/src/lib/herbAnimation";
     // @ts-ignore
-    import { herbStore, herbModels, selectedHerbKey } from "/src/stores/herbStore.ts";
+    import { herbStore, herbModels, selectedHerbKey, herbIoTData } from "/src/stores/herbStore.ts";
     //import * as dat from "dat.gui";
 
     let scene: THREE.Scene;
@@ -26,6 +26,7 @@
     let selectedHoloCard: any;
     let birdAnimationMixer: any;
     let clock = new THREE.Clock();
+    let prevClickTime = 0;
 
     onMount(() => {
         init();
@@ -98,13 +99,13 @@
 
 
         // Initialize ambient light
-        ambientLight = new THREE.AmbientLight(0xffe7c4, 1.3);
+        ambientLight = new THREE.AmbientLight(0xffe7c4, 1.0);
         
 
         scene.add(ambientLight);
 
         // Initialize directional light
-        directionalLight = new THREE.DirectionalLight(0xffe7c4, 0.5);
+        directionalLight = new THREE.DirectionalLight(0xffe7c4, 0.2);
         directionalLight.position.set(0, 50, 0);
         directionalLight.castShadow = true;
         directionalLight.receiveShadow = true;
@@ -172,6 +173,9 @@
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(scene.children,true);
             //console.log(intersects[0], "intersects");
+            // Calculate the time elapsed since the previous click
+            const currentTime = new Date().getTime();
+            const timeElapsed = currentTime - prevClickTime;
 
             if (intersects.length > 0) {
                 const selectedThreeObject = intersects[0].object;
@@ -187,7 +191,7 @@
                 return intersects[0].object;
                 
             }
-            else{
+            if (!intersects.length && timeElapsed < 300) {
                 selectedHerbKey.set(null);
                 if (selectedHerbObject){
                     //selectedHerbObject.material.color.set(0xffffff);
@@ -195,6 +199,16 @@
                     selectedHerbObject.remove(selectedHoloCard);
                 }
                 selectedHerbObject = null;
+                return null;
+            }
+            else{
+                // selectedHerbKey.set(null);
+                // if (selectedHerbObject){
+                //     //selectedHerbObject.material.color.set(0xffffff);
+                //     selectedHerbObject.remove(selectedObjectLight);
+                //     selectedHerbObject.remove(selectedHoloCard);
+                // }
+                // selectedHerbObject = null;
                 return null;
             }
             
