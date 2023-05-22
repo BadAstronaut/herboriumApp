@@ -158,8 +158,9 @@ export function holographicCard(object: THREE.Object3D, textToRender: string) {
     textMesh.position.set(-relativeLeft, relativeTop, 0); // Adjust the position relative to the center of the card as needed
     cardMesh.add(textMesh);
   });
+  const getLastHerb = get(herbIoTData).slice(-1)[0];
   // Create text mesh temp
-  const getTemp = get(herbIoTData)[0].temperature as number;
+  const getTemp = getLastHerb.temperature as number;
   //concatenate the getTemp with a string Temperature: {value}
   const tempString = "Temperature: " + getTemp.toString() + "°C";
   fontLoader.load('/threemodels/threeFont.json', (font) => {
@@ -169,11 +170,11 @@ export function holographicCard(object: THREE.Object3D, textToRender: string) {
       height: _height, // Adjust the extrusion height as needed
     });
     const textMesh = new THREE.Mesh(textGeometryTemp, textMaterial);
-    textMesh.position.set(-relativeLeft, -relativeTop + 0.01, 0); // Adjust the position relative to the center of the card as needed
+    textMesh.position.set(-relativeLeft, -relativeTop + 0.15, 0); // Adjust the position relative to the center of the card as needed
     cardMesh.add(textMesh);
   });
   // Create text mesh temp
-  const getMoist = get(herbIoTData)[0].soil_moisture as string;
+  const getMoist = getLastHerb.soil_moisture as string;
   //concatenate the getTemp with a string Temperature: {value}
   const moistString = "Soil Moisture: " + getMoist + "%";
   fontLoader.load('/threemodels/threeFont.json', (font) => {
@@ -183,7 +184,23 @@ export function holographicCard(object: THREE.Object3D, textToRender: string) {
       height: _height, // Adjust the extrusion height as needed
     });
     const textMesh = new THREE.Mesh(textGeometryTemp, textMaterial);
-    textMesh.position.set(-relativeLeft, -relativeTop - 0.5, 0); // Adjust the position relative to the center of the card as needed
+    textMesh.position.set(-relativeLeft, -relativeTop - 0.3, 0); // Adjust the position relative to the center of the card as needed
+    cardMesh.add(textMesh);
+  });
+
+  //concatenate the getTemp with a string Temperature: {value}
+  const _ldate = getLastHerb.created_at as string;
+  const date = new Date(_ldate);
+  const chileTime = date.toLocaleString("es-CL", { timeZone: "America/Santiago" });
+  const lastDate = "Last Update: " + chileTime;
+  fontLoader.load('/threemodels/threeFont.json', (font) => {
+    const textGeometryTemp = new TextGeometry(lastDate, {
+      font: font,
+      size: _size*0.5, // Adjust the text size as needed
+      height: _height*0.5, // Adjust the extrusion height as needed
+    });
+    const textMesh = new THREE.Mesh(textGeometryTemp, textMaterial);
+    textMesh.position.set(-relativeLeft, -relativeTop - 0.6, 0); // Adjust the position relative to the center of the card as needed
     cardMesh.add(textMesh);
   });
 
