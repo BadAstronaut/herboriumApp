@@ -88,7 +88,10 @@
         renderer.setSize(canvas.clientWidth, canvas.clientHeight);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.shadowMap.bias = 0.001; // Adjust shadow bias if needed
+        //renderer.shadowMap.bias = 0.001; // Adjust shadow bias if needed
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        // Get the device pixel ratio
+        const pixelRatio = window.devicePixelRatio || 1;
         //orbit controls
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
@@ -293,6 +296,7 @@
                 if (child instanceof THREE.Mesh) {
                     //child.receiveShadow = true;
                     child.castShadow = true;
+                    child.flatShading = false;
                 }
             });
             // Set the position of the model
@@ -383,8 +387,8 @@
         position: absolute;
         top: 3.5rem;
         right: 1rem;
-        height: 1rem;
-        width: 1rem;
+        height: 1.5rem;
+        width: 1.5rem;
         padding: 0;
         box-shadow: 0 2px 4px darkslategray;
         border-radius: 50%;

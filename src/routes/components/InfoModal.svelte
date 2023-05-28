@@ -1,5 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    //on destroy 
+    import { onDestroy } from "svelte";
     import Chart from "chart.js/auto";
     import type { ChartConfiguration, ChartData } from "chart.js";
     import { get } from "svelte/store";
@@ -23,11 +25,16 @@
     let scene: THREE.Scene;
     let chartInstance: Chart;
 
+    //on destroy reset the chart and scene 
+
     $: {
         if (dialog && showModal) {
             dialog.showModal();
             selecteHerb = get(selectedHerbKey);
-            createThreeScene();
+            if (selecteHerb) {
+                createThreeScene();
+            }
+            
 
             //add chart
             let iotData = get(herbIoTData);
@@ -36,24 +43,25 @@
                 return date.getDate();
             });
             const values = iotData.map((item) => item.temperature);
-            const soilMoistureValues = iotData.map((item) => item.soil_moisture);
+            const soilMoistureValues = iotData.map(
+                (item) => item.soil_moisture
+            );
             const data = {
                 labels: labels, // Provide your data labels here
                 datasets: [
                     {
                         label: "Temperatura", // Provide a label for the dataset
-                        id:"temperature",
+                        id: "temperature",
                         data: values, // Provide your data values here
                         borderColor: "rgb(75, 192, 192)", // Customize the line color
                         fill: true, // Set to false to remove fill color below the line
-                        
                     },
                     {
-                    label: "Soil Moisture",
-                    id:"soil_moisture",
-                    data: soilMoistureValues,
-                    borderColor: "rgb(192, 75, 192)",
-                    fill: false,
+                        label: "Soil Moisture",
+                        id: "soil_moisture",
+                        data: soilMoistureValues,
+                        borderColor: "rgb(192, 75, 192)",
+                        fill: false,
                     },
                 ],
             };
@@ -62,46 +70,69 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    
                     y: [
-                    {
-                        type: "linear",
-                        display: false,
-                        position: "left",
-                        id: "temperature",
-                        beginAtZero: true,
-                        scaleLabel: {
-                        display: false,
-                        labelString: "Temperature (°C)",
+                        {
+                            type: "linear",
+                            display: false,
+                            position: "left",
+                            id: "temperature",
+                            beginAtZero: true,
+                            scaleLabel: {
+                                display: false,
+                                labelString: "Temperature (°C)",
+                            },
                         },
-                    },
-                    {
-                        type: "linear",
-                        display: false,
-                        position: "left",
-                        id: "soil_moisture",
-                        beginAtZero: true,
-                        ticks: {
-                        callback: function (value) {
-                            return value + "%";
+                        {
+                            type: "linear",
+                            display: false,
+                            position: "left",
+                            id: "soil_moisture",
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return value + "%";
+                                },
+                            },
+                            scaleLabel: {
+                                display: false,
+                                labelString: "Soil Moisture (%)",
+                            },
                         },
-                        },
-                        scaleLabel: {
-                        display: false,
-                        labelString: "Soil Moisture (%)",
-                        },
-                    },
                     ],
                 },
                 plugins: {
                     legend: {
-                    display: false, // Hide the legend
+                        display: false, // Hide the legend
                     },
                 },
             };
-                // Add more chart options as needed
+            // Add more chart options as needed
 
             createChart(data, options);
+        }
+        else if (chartInstance && scene) {
+            dialog.close();
+            //destroy chart
+            chartInstance.destroy();
+            //destroy scene
+            // Dispose materials and textures
+                scene.traverse((object) => {
+                if (object.isMesh) {
+                    // Dispose material
+                    object.material.dispose();
+
+                    // Dispose textures
+                    if (object.material.map) object.material.map.dispose();
+                    if (object.material.normalMap) object.material.normalMap.dispose();
+                    // ... dispose other textures if needed
+                }
+                });
+
+                // Remove scene objects
+            scene.remove(...scene.children);
+
+            scene = null;
+            model = null;
         }
     }
 
@@ -127,6 +158,13 @@
             alpha: true,
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        // Get the device pixel ratio
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        const pixelRatio = window.devicePixelRatio || 1;
+
+        // Set the pixel ratio for the renderer
+        renderer.setPixelRatio(pixelRatio);
         //add warm lightning to the scene
         const light = new THREE.AmbientLight(0x404040); // soft white light
         scene.add(light);
@@ -182,6 +220,7 @@
                 if (child instanceof THREE.Mesh) {
                     //child.receiveShadow = true;
                     child.castShadow = true;
+                    flatShading: false;
                 }
             });
             model.scale.set(scaleValue, scaleValue, scaleValue);
