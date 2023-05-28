@@ -24,12 +24,20 @@
     let model: THREE.Object3D;
     let scene: THREE.Scene;
     let chartInstance: Chart;
+    //last container holder 
+    let lastWatered : string;
+    let lastFeed : string;
+    let battery: string;
+    let plantedDate: string;
+    let harvestDate: string;
+
 
     //on destroy reset the chart and scene 
 
     $: {
         if (dialog && showModal) {
             dialog.showModal();
+            loadPlantData();
             selecteHerb = get(selectedHerbKey);
             if (selecteHerb) {
                 createThreeScene();
@@ -38,6 +46,8 @@
 
             //add chart
             let iotData = get(herbIoTData);
+            let lastIotValue = helper_getLastOrFirstValue(iotData);
+            battery = lastIotValue.battery;
             const labels = iotData.map((item) => {
                 const date = new Date(item.created_at);
                 return date.getDate();
@@ -255,6 +265,24 @@
             chartInstance.update();
         }
     }
+
+    function loadPlantData(){
+        const platData = get(herbStore);
+        //filter plantData for the selected herb
+        const selectedPlantData = platData.herbs.filter((plant) => plant.herb_name === selecteHerb)[0];
+        lastWatered =helper_getLastOrFirstValue(selectedPlantData.watered.water).water_data ;
+        lastFeed = helper_getLastOrFirstValue(selectedPlantData.feeded.feed).feed_data;
+        //set lastWatered to the timestamp day 
+        lastWatered = new Date(lastWatered.timestamp).toLocaleDateString();
+        lastFeed = new Date(lastFeed.timestamp).toLocaleDateString();
+        plantedDate = selectedPlantData.planted_date;
+        harvestDate = selectedPlantData.planed_harvest_date;
+
+        console.log(selectedPlantData, "plant data");
+    }
+    function helper_getLastOrFirstValue(list: any[]) {
+        return list.length === 1 ? list[0] : list[list.length - 1];
+    }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -266,10 +294,23 @@
     <div class="dialog-container">
         <div class="dialog-content" on:click|stopPropagation>
             <img class="background-image" src="/Info-Background.png" />
-
-            <h2>{selecteHerb}</h2>
+            <div class="head-container">
+                <h2>{selecteHerb}</h2>
+                <div class="last-container">
+                    <p>Last <span class="emoji">💧</span>: {lastWatered}</p>
+                    <p>Last <span class="emoji">🧃</span>:: {lastFeed}</p>
+                </div>
+            </div>
+            
             <div class="chart-area">
                 <canvas id="plantChart" width="400" height="400" />
+            </div>
+            <div class="plant-info-container">
+                <p> <span class="emoji">🔋</span> Level: {battery} %</p>
+                <p> <span class="emoji">🌱</span> Date: {plantedDate}</p>
+                <p> <span class="emoji">👨🏼‍🌾</span>Harvest Date: {plantedDate}</p>
+
+
             </div>
             <div class="three-container">
                 <canvas class="three-plant-view" bind:this={canvas} />
@@ -278,7 +319,7 @@
             <button
                 class="close-button"
                 autofocus
-                on:click={() => dialog.close()}>close modal</button
+                on:click={() => dialog.close()}>Close</button
             >
         </div>
     </div>
@@ -314,6 +355,26 @@
         width: inherit;
         padding: 1em;
     }
+    .head-container{
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+        height: 15%;
+        width: inherit;
+        padding: 0;
+        margin: 0;
+    }
+    .plant-info-container{
+        display: flex;
+        margin-top: 0.3rem;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        height: 35%;
+        width: inherit;
+        padding: 0;
+    }
     .three-container {
         display: flex;
         bottom: 0;
@@ -336,7 +397,6 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        border: 1px solid black;
         height: 50%;
         width: inherit;
         padding: 0;
@@ -344,10 +404,10 @@
     .close-button {
         position: fixed;
         bottom: 0;
+        text-decoration: solid;
         width: 40%;
         border-radius: 0.2em;
         border: 1px solid #ccc;
-        background: #eee;
         cursor: pointer;
         align-self: center;
         justify-self: end;
