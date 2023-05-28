@@ -5,6 +5,7 @@
     import * as THREE from "three";
     import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
     import { OBJLoader } from 'three-obj-loader';
+    import InfoModal from "./InfoModal.svelte";
     import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
     import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
     import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -27,6 +28,8 @@
     let birdAnimationMixer: any;
     let clock = new THREE.Clock();
     let prevClickTime = 0;
+    let showModal = false;
+
 
     onMount(() => {
         init();
@@ -336,13 +339,84 @@
             return getParentGroup(object.parent);
         }
     }
+    //we need to add a button in the top right corner of the scene that displays a modal 
+    //with the herb information and a button to close the modal
+    function onDisplayInfo(){
+        showModal = true;
+        
+    }
 </script>
 
 <canvas bind:this={canvas} />
+<InfoModal bind:showModal>
+</InfoModal>
+<button on:click={onDisplayInfo}>
+    <div class ="icon-container">
+        <img class="info-icon" src="/info-small.svg" />
+    </div>
+    
+</button>
 
 <style>
     canvas {
         width: 100%;
         height: 100%;
+    }
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1000; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+    }
+    button {
+        background-color: rgba(201,231,202,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        border: none;
+        position: absolute;
+        top: 3.5rem;
+        right: 1rem;
+        height: 1rem;
+        width: 1rem;
+        padding: 0;
+        box-shadow: 0 2px 4px darkslategray;
+        border-radius: 50%;
+        z-index: 1000;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    button:hover {
+        background-color: rgba(231,202,201,0.5);
+        box-shadow: 0 2px 4px darkslategray;
+        transform: scale(1.1);
+    }
+    button:active {
+        background-color: rgba(201,215,231,0.5);
+        box-shadow: 0 2px 4px darkslategray;
+        transform: scale(1.1);
+    }
+    .icon-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* Adjust the size of the container as needed */
+        width: inherit;
+        height: inherit;
+        /* Add any additional container styles */
+    }
+    .info-icon {
+        position: absolute;
+        width: 100%;
+        height: auto;
+        fill: white;
+        
+
     }
 </style>

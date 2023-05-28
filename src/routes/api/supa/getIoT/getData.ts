@@ -17,7 +17,6 @@ export async function getData() {
         SELECT *, ROW_NUMBER() OVER (ORDER BY created_at) AS row_num
         FROM herbsiot
       ) AS subquery
-      WHERE (row_num - 1) % 80 = 0;
     `);
     console.log(data, "data111");
 
