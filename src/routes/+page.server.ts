@@ -1,12 +1,18 @@
 
 // +page.server.js
+import { redirect } from '@sveltejs/kit'
+import type { Actions, PageServerLoad } from './$types'
 
 /** @type {import('./$types').Actions} */
-export const actions = {
-    default: async (event) => {
-        //event.preventDefault();need to find a way to prevent default from executing on any input change 
-        
-        // TODO log the user in
-        console.log("default action........");
-    }
-};
+export const actions: Actions = {
+    feed: async ({ request }) => {
+      const formData = await request.formData()
+      const data = Object.fromEntries(formData)
+  
+      // do whatever you want still not loading data 
+      //still re loading scenes on send 
+      console.log(data, "data from server", formData)
+  
+      //throw redirect(303, '/')
+    },
+  }

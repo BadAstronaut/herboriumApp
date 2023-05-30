@@ -1,33 +1,37 @@
 <script lang="ts">
+    import { enhance } from '$app/forms';
     import { get } from "svelte/store";
     import { onMount } from "svelte";
+    
+    /** @type {import('./$types').PageData} */
+    export let data;
+    /** @type {import('./$types').ActionData} */
+    export let form;
 
     let waterAmount = 0;
 
-    function increment() {
+    function increment(event) {
+        //prevent default form action 
+        event?.preventDefault();
         waterAmount += 50;
     }
 
-    function decrement() {
+    function decrement(event) {
+        event?.preventDefault();
         if (waterAmount >= 50) {
             waterAmount -= 50;
         }
     }
-    function handleSubmit(event) {
-        event.preventDefault();
-        console.log("Water amount:.....", waterAmount);
-        // You can perform additional actions here, such as submitting the form data to a server.
-    }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<form method="POST"  class="feed-content">
+<form method="POST" action="?/feed" use:enhance  class="feed-content">
     <div class="upper-menu">
         <button type="submit" class="submit-button">S</button>
     </div>
     <div class="water-counter"> 
         <button class="feed-button" on:click={decrement}>-</button>
-        <input class="feed-input"  bind:value={waterAmount} />
+        <input type="number" class="feed-input"  bind:value={waterAmount} />
         <button class="feed-button" on:click={increment}>+</button>
     </div>
 </form>
