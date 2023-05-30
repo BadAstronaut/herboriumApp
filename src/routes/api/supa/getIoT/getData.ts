@@ -18,7 +18,7 @@ export async function getData() {
         FROM herbsiot
       ) AS subquery
     `);
-    console.log(data, "data111");
+    //console.log(data, "data111");
 
     return data;
   } catch (error) {

@@ -29,6 +29,7 @@
     let clock = new THREE.Clock();
     let prevClickTime = 0;
     let showModal = false;
+    let executingCommand: any;
 
 
     onMount(() => {
@@ -89,9 +90,10 @@
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         //renderer.shadowMap.bias = 0.001; // Adjust shadow bias if needed
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        //renderer.setSize(window.innerWidth, window.innerHeight);
         // Get the device pixel ratio
         const pixelRatio = window.devicePixelRatio || 1;
+        renderer.setPixelRatio(pixelRatio);
         //orbit controls
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
@@ -347,35 +349,48 @@
     //with the herb information and a button to close the modal
     function onDisplayInfo(){
         showModal = true;
+        executingCommand = "info"
+        
+    }
+    function onDisplayFeed(){
+        showModal = true;
+        executingCommand = "feed"
         
     }
 </script>
-
-<canvas bind:this={canvas} />
-<InfoModal bind:showModal>
+<canvas class="three-container" bind:this={canvas} />
+<InfoModal bind:showModal executingCommand={executingCommand}>
 </InfoModal>
-<button on:click={onDisplayInfo}>
-    <div class ="icon-container">
-        <img class="info-icon" src="/info-small.svg" />
-    </div>
-    
-</button>
+<div class="button-container">
+    <button id="info" on:click={onDisplayInfo}>
+        <div class ="icon-container">
+            <img class="info-icon" src="/clipboard-heart.svg" />
+        </div> 
+    </button>
+    <button id="feed" on:click={onDisplayFeed}>
+        <div class ="icon-container">
+            <img class="info-icon" style="width=50%" src="/droplet-filled-2.svg" />
+        </div> 
+    </button>
+</div>
+
 
 <style>
-    canvas {
+    .three-container {
         width: 100%;
         height: 100%;
     }
-    .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1000; /* Sit on top */
-        padding-top: 100px; /* Location of the box */
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
+    .button-container{
+        position: absolute;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: flex-start;
+        gap: 0.75rem;
+        width: auto;
+        top: 3.5rem;
+        right: 1rem;
+        z-index: 1000;
     }
     button {
         background-color: rgba(201,231,202,0.5);
@@ -384,9 +399,6 @@
         justify-content: center;
         color: white;
         border: none;
-        position: absolute;
-        top: 3.5rem;
-        right: 1rem;
         height: 1.5rem;
         width: 1.5rem;
         padding: 0;
@@ -417,8 +429,9 @@
     }
     .info-icon {
         position: absolute;
-        width: 100%;
-        height: auto;
+        width: 1.2rem;
+        height: 1.2rem;
+        color: white;
         fill: white;
         
 

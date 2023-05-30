@@ -18,7 +18,7 @@
     
 </script>
 <body>
-    <div class="three-viewer">
+    <div class="three-viewer-main">
         <ThreeViewer />
     </div>
     <div class="grow-log">
@@ -35,7 +35,7 @@
         
 
     }
-    .three-viewer{
+    .three-viewer-main{
         display: flex;
         flex-direction: column;
         justify-content: start;
@@ -50,7 +50,7 @@
         justify-content: start;
         align-items: center;
         width: 100%;
-        height: auto;
+        height: 50%;
         overflow: auto;
         margin: 0;
     }
