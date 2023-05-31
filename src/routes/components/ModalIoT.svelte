@@ -30,92 +30,103 @@
     let plantedDate: string;
     let harvestDate: string;
     let chartCanvas: HTMLCanvasElement;
+    let chartjsData: ChartData;
+    let chartjsOptions: ChartConfiguration;
 
-    //on destroy reset the chart and scene
+    //we need a funtion that runs once the component is finish loading 
+    onMount(async () => {
+        //load the plant data
+        console.log("onMount..........", showModal);
+        loadPlantData();
+        //load the 3d model
+        createThreeScene();
+        
+    });
 
     $: {//had to add chartCanvas here to make it work since it runs before onMount, this part is the one giving problemes in vercel
         if (showModal && chartCanvas && canvasModal) {
-            loadPlantData();
+            //loadPlantData();
             selecteHerb = get(selectedHerbKey);
-            // if (selecteHerb) {
-            //     createThreeScene();
-            //     console.log("createThreeScene", scene);
-            //     //add chart
-            //     let iotData = get(herbIoTData);
-            //     let lastIotValue = helper_getLastOrFirstValue(iotData);
-            //     battery = lastIotValue.battery;
-            //     const labels = iotData.map((item) => {
-            //         const date = new Date(item.created_at);
-            //         return date.getDate();
-            //     });
-            //     const values = iotData.map((item) => item.temperature);
-            //     const soilMoistureValues = iotData.map(
-            //         (item) => item.soil_moisture
-            //     );
-            //     const data = {
-            //         labels: labels, // Provide your data labels here
-            //         datasets: [
-            //             {
-            //                 label: "Temperatura", // Provide a label for the dataset
-            //                 id: "temperature",
-            //                 data: values, // Provide your data values here
-            //                 borderColor: "rgb(75, 192, 192)", // Customize the line color
-            //                 fill: true, // Set to false to remove fill color below the line
-            //             },
-            //             {
-            //                 label: "Soil Moisture",
-            //                 id: "soil_moisture",
-            //                 data: soilMoistureValues,
-            //                 borderColor: "rgb(192, 75, 192)",
-            //                 fill: false,
-            //             },
-            //         ],
-            //     };
+            //this bit is breaking vercel, probably something loading before onMount is done 
+            if (selecteHerb) {
+                //createThreeScene();
+                console.log("createThreeScene", scene);
+                //add chart
+                let iotData = get(herbIoTData);
+                let lastIotValue = helper_getLastOrFirstValue(iotData);
+                battery = lastIotValue.battery;
+                const labels = iotData.map((item) => {
+                    const date = new Date(item.created_at);
+                    return date.getDate();
+                });
+                const values = iotData.map((item) => item.temperature);
+                const soilMoistureValues = iotData.map(
+                    (item) => item.soil_moisture
+                );
+                chartjsData = {
+                    labels: labels, // Provide your data labels here
+                    datasets: [
+                        {
+                            label: "Temperatura", // Provide a label for the dataset
+                            id: "temperature",
+                            data: values, // Provide your data values here
+                            borderColor: "rgb(75, 192, 192)", // Customize the line color
+                            fill: true, // Set to false to remove fill color below the line
+                        },
+                        {
+                            label: "Soil Moisture",
+                            id: "soil_moisture",
+                            data: soilMoistureValues,
+                            borderColor: "rgb(192, 75, 192)",
+                            fill: false,
+                        },
+                    ],
+                };
 
-            //     const options = {
-            //         responsive: true,
-            //         maintainAspectRatio: false,
-            //         scales: {
-            //             y: [
-            //                 {
-            //                     type: "linear",
-            //                     display: false,
-            //                     position: "left",
-            //                     id: "temperature",
-            //                     beginAtZero: true,
-            //                     scaleLabel: {
-            //                         display: false,
-            //                         labelString: "Temperature (°C)",
-            //                     },
-            //                 },
-            //                 {
-            //                     type: "linear",
-            //                     display: false,
-            //                     position: "left",
-            //                     id: "soil_moisture",
-            //                     beginAtZero: true,
-            //                     ticks: {
-            //                         callback: function (value) {
-            //                             return value + "%";
-            //                         },
-            //                     },
-            //                     scaleLabel: {
-            //                         display: false,
-            //                         labelString: "Soil Moisture (%)",
-            //                     },
-            //                 },
-            //             ],
-            //         },
-            //         plugins: {
-            //             legend: {
-            //                 display: false, // Hide the legend
-            //             },
-            //         },
-            //     };
-            //     // Add more chart options as needed
-
-            //     createChart(data, options);
-            // }
+                chartjsOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: [
+                            {
+                                type: "linear",
+                                display: false,
+                                position: "left",
+                                id: "temperature",
+                                beginAtZero: true,
+                                scaleLabel: {
+                                    display: false,
+                                    labelString: "Temperature (°C)",
+                                },
+                            },
+                            {
+                                type: "linear",
+                                display: false,
+                                position: "left",
+                                id: "soil_moisture",
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return value + "%";
+                                    },
+                                },
+                                scaleLabel: {
+                                    display: false,
+                                    labelString: "Soil Moisture (%)",
+                                },
+                            },
+                        ],
+                    },
+                    plugins: {
+                        legend: {
+                            display: false, // Hide the legend
+                        },
+                    },
+                };
+                // Add more chart options as needed
+                createChart(chartjsData, chartjsData);
+                
+            }
 
         }
         ///////// neeed to improve this part do discart the scene and chart on
@@ -392,8 +403,5 @@
         to {
             opacity: 1;
         }
-    }
-    button {
-        display: block;
     }
 </style>
