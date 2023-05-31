@@ -38,8 +38,8 @@
             <!-- <img class="background-image" src="/Info-Background.png" /> -->
             {#if executingCommand == "info"}
                 <ModalIoT showModal={showModal} />
-            <!-- {:else if executingCommand == "feed"}
-                <FeedModal showModal={showModal} /> -->
+            {:else if executingCommand == "feed"}
+                <FeedModal showModal={showModal} />
             {/if}
             <button
                 class="close-button"

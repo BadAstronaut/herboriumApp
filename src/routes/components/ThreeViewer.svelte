@@ -359,8 +359,8 @@
     }
 </script>
 <canvas class="three-container" bind:this={canvas} />
-<InfoModal bind:showModal executingCommand={executingCommand}>
-</InfoModal>
+<!-- <InfoModal bind:showModal executingCommand={executingCommand}>
+</InfoModal> -->
 <div class="button-container">
     <button id="info" on:click={onDisplayInfo}>
         <div class ="icon-container">
