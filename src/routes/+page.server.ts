@@ -7,7 +7,7 @@ import type { Actions, PageServerLoad } from './$types'
 export const actions: Actions = {
     feed: async ({ request }) => {
       const formData = await request.formData()
-      const data = Object.fromEntries(formData)
+      const data = formData.get('water')
   
       // do whatever you want still not loading data 
       //still re loading scenes on send 

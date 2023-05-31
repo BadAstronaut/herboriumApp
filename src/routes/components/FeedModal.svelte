@@ -31,7 +31,7 @@
     </div>
     <div class="water-counter"> 
         <button class="feed-button" on:click={decrement}>-</button>
-        <input type="number" class="feed-input"  bind:value={waterAmount} />
+        <input name="water" type="number" class="feed-input"  bind:value={waterAmount} />
         <button class="feed-button" on:click={increment}>+</button>
     </div>
 </form>

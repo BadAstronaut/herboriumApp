@@ -298,7 +298,7 @@
                 if (child instanceof THREE.Mesh) {
                     //child.receiveShadow = true;
                     child.castShadow = true;
-                    child.flatShading = false;
+                    
                 }
             });
             // Set the position of the model
@@ -308,7 +308,7 @@
             model.position.set(x, 0, y);
             //we can add properties to map 3D elemnts and other data later on
             model.userData.Herb = herb.herb_name;
-            console.log(model, "model.......")
+            //console.log(model, "model.......")
             // Add the model to the scene
             scene.add(model);
         });
@@ -326,7 +326,7 @@
                 herb_name: herb.herb_name,
                 herb_coordinate: coord,
                 };
-                console.log(model_coord, "herb");
+                //console.log(model_coord, "herb");
                 loadModel(model_url,herbModelInterface);
             });
             
@@ -399,8 +399,8 @@
         justify-content: center;
         color: white;
         border: none;
-        height: 1.5rem;
-        width: 1.5rem;
+        height: 1.75rem;
+        width: 1.75rem;
         padding: 0;
         box-shadow: 0 2px 4px darkslategray;
         border-radius: 50%;
@@ -429,8 +429,8 @@
     }
     .info-icon {
         position: absolute;
-        width: 1.2rem;
-        height: 1.2rem;
+        width: 1.3rem;
+        height: 1.3rem;
         color: white;
         fill: white;
         
