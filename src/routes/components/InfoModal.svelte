@@ -35,14 +35,13 @@
 >
     <div class="dialog-container">
         <div class="dialog-content" >
-            <FeedModal showModal={showModal} />
-            <!-- <img class="background-image" src="/Info-Background.png" /> 
+            <!-- <img class="background-image" src="/Info-Background.png" /> -->
             {#if executingCommand == "info"}
-                <ModalIoT showModal={showModal} />
+                <!-- <ModalIoT showModal={showModal} /> -->
             {:else if executingCommand == "feed"}
                 <FeedModal showModal={showModal} />
             {/if}
-        -->
+        
             <button
                 class="close-button"
                 autofocus
