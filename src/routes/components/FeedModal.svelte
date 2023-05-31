@@ -2,11 +2,7 @@
     import { enhance } from '$app/forms';
     import { get } from "svelte/store";
     import { onMount } from "svelte";
-    
-    /** @type {import('./$types').PageData} */
-    export let data;
-    /** @type {import('./$types').ActionData} */
-    export let form;
+
 
     let waterAmount = 0;
 
