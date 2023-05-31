@@ -1,19 +1,16 @@
 <script lang="ts">
-    import { enhance } from '$app/forms';
     import { get } from "svelte/store";
     import { onMount } from "svelte";
 
 
     let waterAmount = 0;
 
-    function increment(event) {
+    function increment() {
         //prevent default form action 
-        event?.preventDefault();
         waterAmount += 50;
     }
 
-    function decrement(event) {
-        event?.preventDefault();
+    function decrement() {;
         if (waterAmount >= 50) {
             waterAmount -= 50;
         }
