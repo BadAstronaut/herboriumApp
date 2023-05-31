@@ -22,10 +22,24 @@
             waterAmount -= 50;
         }
     }
+    //form submit handler
+    async function submit(event) {
+        event.preventDefault();
+        // console.log(waterAmount);
+        // const response = await fetch("/api/feed", {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify({ waterAmount }),
+        // });
+        // const json = await response.json();
+        console.log(waterAmount);
+    }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<form method="POST" action="?/feed" use:enhance  class="feed-content">
+<form on:submit={submit}  class="feed-content">
     <div class="upper-menu">
         <button type="submit" class="submit-button">S</button>
     </div>
