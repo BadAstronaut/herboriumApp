@@ -34,7 +34,7 @@
     on:click|self={() => dialog.close()}
 >
     <div class="dialog-container">
-        <div class="dialog-content" on:click|stopPropagation>
+        <div class="dialog-content" >
             <!-- <img class="background-image" src="/Info-Background.png" /> -->
             {#if executingCommand == "info"}
                 <ModalIoT showModal={showModal} />
