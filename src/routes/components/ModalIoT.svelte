@@ -33,8 +33,8 @@
 
     //on destroy reset the chart and scene
 
-    $: {//had to add chartCanvas here to make it work since it runs before onMount
-        if (showModal && chartCanvas) {
+    $: {//had to add chartCanvas here to make it work since it runs before onMount, this part is the one giving problemes in vercel
+        if (showModal && chartCanvas && canvasModal) {
             loadPlantData();
             selecteHerb = get(selectedHerbKey);
             if (selecteHerb) {
