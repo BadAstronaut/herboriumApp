@@ -2,6 +2,7 @@
     import { get } from "svelte/store";
     import { onMount } from "svelte";
 
+    export let showModal: boolean; // boolean
 
     let waterAmount = 0;
 

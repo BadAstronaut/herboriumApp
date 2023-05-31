@@ -35,7 +35,7 @@
 >
     <div class="dialog-container">
         <div class="dialog-content" >
-            <ModalIoT showModal={showModal} />
+            <FeedModal showModal={showModal} />
             <!-- <img class="background-image" src="/Info-Background.png" /> 
             {#if executingCommand == "info"}
                 <ModalIoT showModal={showModal} />
