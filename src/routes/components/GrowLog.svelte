@@ -87,7 +87,11 @@
         let herbKeyIndex = parseInt(row.id);
         if (currentSelected != herbs.herbs[herbKeyIndex].herb_name){
             //console.log(herbs.herbs[herbKeyIndex].herb_name, "herb name"
-            selectedHerbKey.set(herbs.herbs[herbKeyIndex].herb_name);
+            //create the objset to set herbkey 
+            const herbName = herbs.herbs[herbKeyIndex].herb_name;
+            const herbIndex= herbName + "0"
+            const herbObject = {herb: herbName, herbId: herbIndex}
+            selectedHerbKey.set(herbObject);
         }
         //console.log(row, "row selection changed");
     }

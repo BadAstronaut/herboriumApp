@@ -18,7 +18,7 @@
 
     export let showModal: boolean; // boolean
     let chartData: any; // any
-    let selecteHerb = get(selectedHerbKey);
+    let selecteHerb =get(selectedHerbKey) ;
     let canvasModal: HTMLCanvasElement; // HTMLCanvasElement
     let model: THREE.Object3D;
     let scene: THREE.Scene;
@@ -50,7 +50,7 @@
             //this bit is breaking vercel, probably something loading before onMount is done 
             if (selecteHerb) {
                 //createThreeScene();
-                console.log("createThreeScene", scene);
+                //console.log("createThreeScene", scene);
                 //add chart
                 let iotData = get(herbIoTData);
                 let lastIotValue = helper_getLastOrFirstValue(iotData);
@@ -158,7 +158,7 @@
         }
     }
 
-    console.log(selecteHerb);
+    //console.log(selecteHerb);
     //create functions to render a threejs scene with the selected herb
     function createThreeScene() {
         //create a scene
@@ -219,8 +219,8 @@
         //move camera back
         //camera.position.z = 5;
         //create a render function
-        console.log(get(herbIoTData), "selecteHerb....from modal");
-        loadModel(get(herbModels)[selecteHerb], selecteHerb);
+        console.log(get(herbModels)[selecteHerb.herb], "selecteHerb................from modal");
+        loadModel(get(herbModels)[selecteHerb.herb], selecteHerb.herb);
 
         const render = function () {
             requestAnimationFrame(render);
@@ -250,7 +250,7 @@
             model.position.set(0, -1, 0);
             //we can add properties to map 3D elemnts and other data later on
             model.userData.Herb = herb.herb_name;
-            console.log(scene, "model.......");
+            //console.log(scene, "model.......");
             // Add the model to the scene
             scene.add(model);
         });
@@ -284,7 +284,7 @@
         const platData = get(herbStore);
         //filter plantData for the selected herb
         const selectedPlantData = platData.herbs.filter(
-            (plant) => plant.herb_name === selecteHerb
+            (plant) => plant.herb_name === selecteHerb.herb
         )[0];
         lastWatered = helper_getLastOrFirstValue(
             selectedPlantData.watered.water
@@ -309,7 +309,7 @@
 
 <div class="dialog-content-iot" >
     <div class="head-container">
-        <h2>{selecteHerb}</h2>
+        <h2>{selecteHerb.herb}</h2>
         <div class="last-container">
             <p>Last <span class="emoji">💧</span>: {lastWatered}</p>
             <p>Last <span class="emoji">🧃</span>: {lastFeed}</p>

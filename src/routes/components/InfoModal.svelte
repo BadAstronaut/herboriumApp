@@ -10,16 +10,21 @@
     import FeedModal from "./FeedModal.svelte";
 
     export let showModal: boolean; // boolean
+    export let onClose: () => void; // function
     
     export let executingCommand: string //id of command to execute
+    console.log("testing disposal ", showModal);
 
     let dialog: HTMLDialogElement; // HTMLDialogElement
     //on destroy reset the chart and scene 
+    onDestroy(() => {
+        console.log("destroying modal.......");
+    });
 
     $: {
         if (dialog && showModal) {
             dialog.showModal();
-            console.log("showing modal.;.......", executingCommand);
+            //console.log("showing modal.;.......", executingCommand);
         }
 
     }

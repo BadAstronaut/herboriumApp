@@ -240,7 +240,7 @@ function addSVGIcon(cardMesh: THREE.Mesh) {
 
       for (let j = 0; j < shapes.length; j++) {
         const shape = shapes[j];
-        console.log(shape, "shape");
+        //console.log(shape, "shape");
         //const shapes = loader.parse(path.getAttribute('d'));
         const geometry = new THREE.ShapeBufferGeometry(shapes);
         const mesh = new THREE.Mesh(geometry, material);

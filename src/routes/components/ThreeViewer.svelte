@@ -11,7 +11,7 @@
     import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
     import {spotLight, zoomToObject, animateObjectScale, holographicCard, dayAndNightAnimation, loadbirdFlyingAnimation} from "/src/lib/herbAnimation";
     // @ts-ignore
-    import { herbStore, herbModels, selectedHerbKey, herbIoTData } from "/src/stores/herbStore.ts";
+    import { herbStore, herbModels, selectedHerbKey, herbIoTData, herbInstanceStore, selectedHerb } from "/src/stores/herbStore.ts";
     //import * as dat from "dat.gui";
 
     let scene: THREE.Scene;
@@ -188,6 +188,7 @@
             if (intersects.length > 0) {
                 const selectedThreeObject = intersects[0].object;
                 const selectedObject =getHerbData(intersects[0].object) ;
+
                 selectedHerbKey.set(selectedObject);
                 const parentObjt = getParentGroup(intersects[0].object);
                 //console.log(intersects[0].object, "selectedObject");
@@ -241,7 +242,7 @@
             // selectedHerbObject.material.transparent=true // Set the color to red or any other desired color
             // selectedHerbObject.material.opacity=true // Set the color to red or any other desired color
             
-            
+            console.log(selectedHerbObject, "selectedHerbObject......");
             animateObjectScale(selectedHerbObject)
             selectedHoloCard = holographicCard(selectedHerbObject, get(selectedHerbKey));
             const _spotLight = spotLight(selectedHerbObject);
@@ -254,7 +255,8 @@
         //extract the userData object from the selected object
         function getHerbData(object: THREE.Object3D | null): any {
             if (object && object.userData.Herb) {
-                return object.userData.Herb;
+                const herbObject = {herb: object.userData.Herb, herbId: object.userData.HerbId}
+                return herbObject;
             } else {
                 if (!object) {
                     return null;
@@ -308,6 +310,7 @@
             model.position.set(x, 0, y);
             //we can add properties to map 3D elemnts and other data later on
             model.userData.Herb = herb.herb_name;
+            model.userData.HerbId = herb.herb_id;
             //console.log(model, "model.......")
             // Add the model to the scene
             scene.add(model);
@@ -315,22 +318,29 @@
     }
     function loadMultipleModels(herbs:any){
         const _herbsModels = get(herbModels) as [];
+        let _herbInstances = [] ;
         herbs.forEach((herb:any) => {
             
             //get url from _herbsModels using herbs.herb_name
             const model_url = _herbsModels[herb.herb_name];
             const model_coord = herb.herb_coordinates.coordinates;
-            
+
+            let indexId = 0;
             model_coord.forEach((coord:any) => {
+                //concatenate herbname and idenxid
                 const herbModelInterface = {
                 herb_name: herb.herb_name,
                 herb_coordinate: coord,
+                herb_id: herb.herb_name + indexId.toString()
                 };
-                //console.log(model_coord, "herb");
+                indexId++;
+                _herbInstances.push(herbModelInterface);
+                //console.log(model_coord, "herb coordinate to ID");
                 loadModel(model_url,herbModelInterface);
             });
             
         });
+        herbInstanceStore.set(_herbInstances);
     }
 
     ///////////// End Model Loader //////////////
@@ -359,8 +369,10 @@
     }
 </script>
 <canvas class="three-container" bind:this={canvas} />
-<InfoModal bind:showModal executingCommand={executingCommand}>
+{#if showModal}
+<InfoModal bind:showModal onClose={()=>showModal=false} executingCommand={executingCommand}>
 </InfoModal>
+{/if}
 <div class="button-container">
     <button id="info" on:click={onDisplayInfo}>
         <div class ="icon-container">
