@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     //on destroy 
     import { onDestroy } from "svelte";
-
+    import toast, { Toaster } from "svelte-french-toast";
     import { get } from "svelte/store";
 
     import ModalIoT from "./ModalIoT.svelte";

@@ -1,32 +1,33 @@
 <script lang="ts">
     import { get } from "svelte/store";
-    import {onDestroy} from "svelte";
+    import { onDestroy } from "svelte";
     import { onMount } from "svelte";
+    import toast, { Toaster } from "svelte-french-toast";
     import { selectedHerbKey, herbInstanceStore } from "../../stores/herbStore";
     import MultiSelect from "./MultiSelect.svelte";
 
     export let showModal: boolean; // boolean
-    //dialog.close on the parent element 
+    //dialog.close on the parent element
     export let dialog: any;
 
     let waterAmount = 0;
     let fetlizerAmount = 0;
     let selectedPlants: any;
-    let currentSelection =get(selectedHerbKey); 
+    let currentSelection = get(selectedHerbKey);
     let herbsInScene = get(herbInstanceStore);
     let filteredherbs = filterHerbsInScene();
     let value = [currentSelection.herbId];
+    let saveFeed: any;
 
     $: {
         if (showModal) {
-            currentSelection =get(selectedHerbKey); 
+            currentSelection = get(selectedHerbKey);
             filteredherbs = filterHerbsInScene();
             console.log("showing modal.......", get(selectedHerbKey));
         } else {
             console.log("closssing show modal.......");
         }
     }
-    
 
     //create a function     that filter herbsInScene based on selectedPlants
     function filterHerbsInScene() {
@@ -65,7 +66,12 @@
             fetlizerAmount -= 1;
         }
     }
-    async function  postToEndpoint(waterAmount: Number, fetlizerAmount:Number, herbName: String, herbInstance: String){
+    async function postToEndpoint(
+        waterAmount: Number,
+        fetlizerAmount: Number,
+        herbName: String,
+        herbInstance: String
+    ) {
         let timestamp = new Date().toISOString();
         const res = await fetch("/api/supa/feedHerbs", {
             method: "POST",
@@ -73,46 +79,65 @@
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                "timestamp": timestamp,
-                "herbName":herbName,
-                "herbInstance":herbInstance,
-                "water":waterAmount,
-                "fertilizer":fetlizerAmount,
+                timestamp: timestamp,
+                herbName: herbName,
+                herbInstance: herbInstance,
+                water: waterAmount,
+                fertilizer: fetlizerAmount,
             }),
         });
         const data = await res.json();
-        const status = await res.status;
-        showModal = false;
-        dialog.close();
-        console.log("data", status, data);
+        saveFeed = await res.status;
+        console.log("res status receiving ", data);
+        //concatenate strings of value array 
+        //to get the herbId
+        const herbIds = value.join();
+        console.log("herbId", herbIds);
+        if (saveFeed === 200) {
+            toast.success(`Herb Feeded! ${data.body.herbInstance}`, {
+                duration: 3000,
+                icon: "🚿",
+                position: "top-right",
+            });
+            
+        } else {
+            toast.error(`Error saving feed ` + { value }, {
+                duration: 3000,
+                position: "top-right",
+            });
+        }
+
+        console.log("data", saveFeed);
     }
     //form submit handler
     async function submit(event: Event) {
         event.preventDefault();
-        if(value.length > 0){
+        if (value.length > 0) {
             //check if water or fertilizer amount is not 0
             //if it is 0, do not post to the endpoint
-            if(waterAmount === 0 && fetlizerAmount === 0){
+            if (waterAmount === 0 && fetlizerAmount === 0) {
                 return;
                 //implemente a toast message need to add water or fertilizer!
-
+            } else {
+                value.forEach((herbId) => {
+                    //get the herb object from filteredherbs array base on herbId
+                    let herbObject = filteredherbs.filter(
+                        (herb) => herb.herb_id === herbId
+                    )[0];
+                    let timestamp = new Date().toISOString();
+                    console.log("herbObject", herbObject);
+                    //let waterAmount = herbObject.water_amount;
+                    postToEndpoint(
+                        waterAmount,
+                        fetlizerAmount,
+                        herbObject.herb_name,
+                        herbId
+                    );
+                });
+                showModal = false;
             }
-            else{
-                value.forEach((herbId)=>{
-                //get the herb object from filteredherbs array base on herbId
-                let herbObject = filteredherbs.filter((herb)=>herb.herb_id === herbId)[0];
-                let timestamp = new Date().toISOString();
-                console.log("herbObject", herbObject);
-                //let waterAmount = herbObject.water_amount;
-                postToEndpoint(waterAmount, fetlizerAmount, herbObject.herb_name, herbId);
-            })
-            }
-            
         }
-        //close the modal after sending 
-        
-        
-
+        //close the modal after sending
 
         console.log("get selected plant", value);
         console.log(waterAmount);
@@ -121,17 +146,14 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events  value={[currentSelection.herbId]}-->
-<form on:submit={submit} class="feed-content" >
+<Toaster />
+<form on:submit={submit} class="feed-content">
     <div class="upper-menu">
         <button type="submit" class="submit-button">
             <img class="feed-info-icon" src="/device-floppy.svg" alt="s" />
         </button>
     </div>
-    <MultiSelect
-        id="lang"
-        bind:value
-        
-    >
+    <MultiSelect id="lang" bind:value>
         {#each filteredherbs as herb}
             <option value={herb.herb_id}>{herb.herb_id}</option>
         {/each}
@@ -190,6 +212,14 @@
         max-width: 50rem;
     }
     .action-div {
+        width: 100%;
+        max-width: 50rem;
+    }
+    .upper-menu {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
         width: 100%;
         max-width: 50rem;
     }

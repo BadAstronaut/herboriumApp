@@ -43,7 +43,7 @@ export async function POST({ request }: RequestEvent) {
         .eq("herb_name", newFeed.herbName);
 
     if (error) {
-        console.error(error);
+        console.error(error, "error here");
         return {
             status: 500,
             body: { message: 'Failed to update the row in the table' }
@@ -52,7 +52,7 @@ export async function POST({ request }: RequestEvent) {
     const res = {
         body: body,
     };
-    console.log(data,error, "data.......");
+    console.log(res, "data.......");
     return new Response(JSON.stringify(res), { status: 200 });
 
 }
