@@ -44,7 +44,7 @@
             {#if executingCommand == "info"}
                 <ModalIoT showModal={showModal} /> 
             {:else if executingCommand == "feed"}
-                <FeedModal showModal={showModal} />
+                <FeedModal showModal={showModal} dialog = {dialog} />
             {/if}
         
             <button

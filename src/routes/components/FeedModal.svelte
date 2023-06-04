@@ -6,14 +6,16 @@
     import MultiSelect from "./MultiSelect.svelte";
 
     export let showModal: boolean; // boolean
-    
+    //dialog.close on the parent element 
+    export let dialog: any;
 
-    let waterAmount = 500;
-    let fetlizerAmount = 5;
+    let waterAmount = 0;
+    let fetlizerAmount = 0;
     let selectedPlants: any;
     let currentSelection =get(selectedHerbKey); 
     let herbsInScene = get(herbInstanceStore);
     let filteredherbs = filterHerbsInScene();
+    let value = [currentSelection.herbId];
 
     $: {
         if (showModal) {
@@ -39,46 +41,86 @@
         console.log("herbsInScene", herbsInScene);
         // return herbsInScene.filter((herb) => selectedPlants.includes(herb.id));
     }
-    function increment() {
+    function increment(event: Event) {
+        event.preventDefault();
         //prevent default form action
         waterAmount += 50;
     }
 
-    function decrement() {
+    function decrement(event: Event) {
+        event.preventDefault();
         if (waterAmount >= 50) {
             waterAmount -= 50;
         }
     }
 
-    function incrementFertilizer() {
+    function incrementFertilizer(event: Event) {
+        event.preventDefault();
         //prevent default form action
         fetlizerAmount += 1;
     }
-    function decrementFertilizer() {
+    function decrementFertilizer(event: Event) {
+        event.preventDefault();
         if (fetlizerAmount >= 1) {
             fetlizerAmount -= 1;
         }
     }
+    async function  postToEndpoint(waterAmount: Number, fetlizerAmount:Number, herbName: String, herbInstance: String){
+        let timestamp = new Date().toISOString();
+        const res = await fetch("/api/supa/feedHerbs", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                "timestamp": timestamp,
+                "herbName":herbName,
+                "herbInstance":herbInstance,
+                "water":waterAmount,
+                "fertilizer":fetlizerAmount,
+            }),
+        });
+        const data = await res.json();
+        const status = await res.status;
+        showModal = false;
+        dialog.close();
+        console.log("data", status, data);
+    }
     //form submit handler
-    async function submit(event) {
+    async function submit(event: Event) {
         event.preventDefault();
-        // console.log(waterAmount);
-        // const response = await fetch("/api/feed", {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify({ waterAmount }),
-        // });
-        // const json = await response.json();
+        if(value.length > 0){
+            //check if water or fertilizer amount is not 0
+            //if it is 0, do not post to the endpoint
+            if(waterAmount === 0 && fetlizerAmount === 0){
+                return;
+                //implemente a toast message need to add water or fertilizer!
 
-        console.log("get selected plant", selectedPlants);
+            }
+            else{
+                value.forEach((herbId)=>{
+                //get the herb object from filteredherbs array base on herbId
+                let herbObject = filteredherbs.filter((herb)=>herb.herb_id === herbId)[0];
+                let timestamp = new Date().toISOString();
+                console.log("herbObject", herbObject);
+                //let waterAmount = herbObject.water_amount;
+                postToEndpoint(waterAmount, fetlizerAmount, herbObject.herb_name, herbId);
+            })
+            }
+            
+        }
+        //close the modal after sending 
+        
+        
+
+
+        console.log("get selected plant", value);
         console.log(waterAmount);
         console.log("selected Plant;.......", get(herbInstanceStore));
     }
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-click-events-have-key-events  value={[currentSelection.herbId]}-->
 <form on:submit={submit} class="feed-content" >
     <div class="upper-menu">
         <button type="submit" class="submit-button">
@@ -87,8 +129,8 @@
     </div>
     <MultiSelect
         id="lang"
-        value={[currentSelection.herbId]}
-        bind:selectedPlants
+        bind:value
+        
     >
         {#each filteredherbs as herb}
             <option value={herb.herb_id}>{herb.herb_id}</option>
