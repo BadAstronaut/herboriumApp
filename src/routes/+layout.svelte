@@ -9,7 +9,7 @@
     <!-- add logoCTEC as a a logo in the top left corner of the nav bar -->
     <img
         class="logo"
-        src="/herborium.jpg"
+        src="/tempLogo.png"
         alt="logoCTEC"
         width="50px"
         height="auto"

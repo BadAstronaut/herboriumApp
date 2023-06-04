@@ -70,15 +70,21 @@
                             label: "Temperatura", // Provide a label for the dataset
                             id: "temperature",
                             data: values, // Provide your data values here
-                            borderColor: "rgb(75, 192, 192)", // Customize the line color
+                            tension: 0.3, // Add bezier curves to the line
+                            borderColor: "rgba(93,134,183,1)", // Customize the line color
                             fill: true, // Set to false to remove fill color below the line
+                            pointRadius: 0, // Remove data points
+                            pointHoverRadius: 0, // Remove data points hover
                         },
                         {
                             label: "Soil Moisture",
                             id: "soil_moisture",
+                            tension: 0.3,
                             data: soilMoistureValues,
-                            borderColor: "rgb(192, 75, 192)",
+                            borderColor: "rgba(183,142,93,1)",
                             fill: false,
+                            pointRadius: 0, // Remove data points
+                            pointHoverRadius: 0, // Remove data points hover
                         },
                     ],
                 };
@@ -286,15 +292,15 @@
         const selectedPlantData = platData.herbs.filter(
             (plant) => plant.herb_name === selecteHerb.herb
         )[0];
-        lastWatered = helper_getLastOrFirstValue(
-            selectedPlantData.watered.water
-        ).water_data;
-        lastFeed = helper_getLastOrFirstValue(
-            selectedPlantData.feeded.feed
-        ).feed_data;
+        console.log(selectedPlantData, "selectedPlantData");
+        //get the last watered and feeded date
+        const feeded = selectedPlantData.feeded.feedArray;
+        const lastFeedObject = feeded[feeded.length - 1];
+        //get last value of array 
+
         //set lastWatered to the timestamp day
-        lastWatered = new Date(lastWatered.timestamp).toLocaleDateString();
-        lastFeed = new Date(lastFeed.timestamp).toLocaleDateString();
+        lastWatered = new Date(lastFeedObject.timestamp).toLocaleDateString();
+        lastFeed = new Date(lastFeedObject.timestamp).toLocaleDateString();
         plantedDate = selectedPlantData.planted_date;
         harvestDate = selectedPlantData.planed_harvest_date;
 
@@ -368,10 +374,10 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 50%;
+        height: 40%;
         width: 50%;
         padding: 0;
-        z-index: 1;
+        z-index: -1;
         pointer-events: none;
     }
     .three-plant-view {
