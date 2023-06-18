@@ -15,5 +15,10 @@ export const herbModels = readable({
 
 export const herbIoTData = writable({});
 
+export const currentWaterLevel = writable({
+    herbObject: {},
+    waterLevel: 10
+});
+
 export let selectedHerbKey = writable({herb: "Basil", herbId: "Basil0"});
 export const selectedHerb = writable({});

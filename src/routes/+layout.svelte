@@ -27,11 +27,12 @@
     nav {
         display: flex;
         flex-direction: row;
+        position: absolute;
         align-items: center;
         justify-content: center;
-        background: white;
         padding-top: 1rem;
         padding-bottom: 1rem;
+        width: 100%;
     }
     nav,
     footer {
