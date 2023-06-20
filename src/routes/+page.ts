@@ -42,10 +42,10 @@ function setWaterLevels(hertIotData: any[]){
     let waterLevel = 10
     if(soilMoistureFloat < 30){
         waterLevel = 10;
-    }else if(soilMoistureFloat > 50){
+    }else if(soilMoistureFloat > 60){
         waterLevel = 100;
     }else{
-        waterLevel = 10 + (soilMoistureFloat - 30) * (100 - 10) / (50 - 30);
+        waterLevel = 10 + (soilMoistureFloat - 30) * (100 - 10) / (60 - 30);
     }
     //set the water level
     currentWaterLevel.set({"herbObject": lastObj, "waterLevel": waterLevel});
